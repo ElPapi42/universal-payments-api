@@ -1,0 +1,40 @@
+version: "3.7"
+services:
+
+  # This db is just for local development.
+  braveminer-postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: braveminer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      PGDATA:  /var/lib/postgresql/data/pgdata
+      TZ: 'GMT-0'
+      PGTZ: 'GMT-0'
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    container_name: braveminer-postgres
+  
+  # This redis is just for local development.
+  braveminer-redis:
+    image: redis:latest
+    command: redis-server --appendonly yes
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data/redis:/data
+    container_name: braveminer-redis
+
+  # FastAPI instance
+  braveminer-backend:
+    build: .
+    image: braveminer-backend
+    volumes:
+      - .:/backend
+    ports:
+      - 8000:8000
+    depends_on:
+      - braveminer-postgres
+    container_name: braveminer-backend
